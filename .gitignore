@@ -1,0 +1,65 @@
+# ---------- أسرار ----------
+.env
+.env.*
+!.env.example
+*.token
+secrets.json
+
+# ---------- قاعدة البيانات: محتوى داخلي حقيقي ----------
+# تحتوي جداول chats و tg_audit و queue على أسئلة موظفين ومعرّفات تيليجرام
+data/*.db
+data/*.db-wal
+data/*.db-shm
+data/*.sqlite
+data/*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# ---------- النسخ الاحتياطية: تفريغ كامل للإجابات والصيغ ----------
+data/backups/
+sanad-*.json
+
+# ---------- كاش النموذج: 130 ميجابايت، يُنزَّل بـ npm install ----------
+data/models/
+
+# ---------- سجلات التشغيل ----------
+data/*.log
+data/guardian.log
+data/guardian-lastalert.txt
+*.log
+npm-debug.log*
+
+# ---------- مستندات مرفوعة ومخرجات استيراد ----------
+data/uploads/
+data/exports/
+*.pdf
+*.xlsx
+*.xls
+!scripts/fixtures/*.pdf
+
+# ---------- أدوات التطوير الداخلية (ACP) ----------
+.acp-sessions/
+.acp-fingerprint.json
+.acp-lessons.md
+.acp-map.md
+.acp-images/
+acp
+acp.cmd
+
+# ---------- ملفات سكراتش ومحاولات تصحيح ----------
+scratch/
+
+# ---------- بناء وتبعيات ----------
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+
+# ---------- نظام التشغيل والمحرر ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp

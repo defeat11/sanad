@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سَنَد PRO | مساعد الدعم الذكي</title>
+  <link rel="stylesheet" href="app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-icon">🤖</span>
+        <div class="logo-text">
+          <h1>سَنَد <span class="badge-pro">PRO</span></h1>
+          <span class="logo-subtitle">مساعد الدعم الآلي الاحترافي الفوري</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="train.html" class="nav-link btn-secondary">
+          <span>لوحة التدريب</span>
+          <span class="nav-icon">⚙️</span>
+        </a>
+      </nav>
+    </header>
+
+    <main class="chat-main">
+      <div class="chat-container">
+        <!-- رسالة الترحيب والتعليمات الافتراضية -->
+        <div class="chat-welcome" id="chat-welcome">
+          <div class="welcome-badge">نشط الآن</div>
+          <h2>مرحباً بك في سَنَد 👋</h2>
+          <p>أنا هنا لمساعدتك والإجابة على استفساراتك بناءً على ما علّمني إياه مُدرّبي.</p>
+        </div>
+
+        <div class="chat-messages" id="chat-messages">
+          <!-- ستظهر الفقاعات هنا ديناميكياً -->
+        </div>
+
+        <div class="chat-suggestions-container" id="chat-suggestions-container" style="display: none;">
+          <div class="suggestions-title">هل تقصد أحد الأسئلة التالية؟</div>
+          <div class="suggestions-list" id="suggestions-list">
+            <!-- أزرار الاقتراحات -->
+          </div>
+        </div>
+
+        <div class="chat-typing-indicator" id="typing-indicator" style="display: none;">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="chat-footer">
+      <form id="chat-form" class="chat-form">
+        <input 
+          type="text" 
+          id="chat-input" 
+          placeholder="اكتب سؤالك هنا..." 
+          autocomplete="off" 
+          required
+        >
+        <button type="submit" class="btn-primary" id="btn-send">
+          <span>إرسال</span>
+          <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </form>
+    </footer>
+  </div>
+
+  <script src="chat.js"></script>
+</body>
+</html>

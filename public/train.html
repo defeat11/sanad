@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم والتدريب | سَنَد - تم التحديث</title>
+  <link rel="stylesheet" href="app.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* CSS إضافي للمصادر والمسودات */
+    .badge-pulse-generating {
+      background-color: rgba(14, 165, 233, 0.15);
+      color: var(--color-primary);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      position: relative;
+      padding-right: 1.5rem !important;
+    }
+    .badge-pulse-generating::before {
+      content: "";
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      animation: pulse-blue-dot 1.5s infinite;
+    }
+    @keyframes pulse-blue-dot {
+      0% { transform: translateY(-50%) scale(0.8); opacity: 0.5; }
+      50% { transform: translateY(-50%) scale(1.2); opacity: 1; }
+      100% { transform: translateY(-50%) scale(0.8); opacity: 0.5; }
+    }
+    
+    .badge-drafted {
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--color-warning);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    
+    .badge-ingested {
+      background-color: rgba(16, 185, 129, 0.15);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    
+    .badge-failed {
+      background-color: rgba(239, 68, 68, 0.15);
+      color: var(--color-danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    
+    .badge-new {
+      background-color: rgba(113, 113, 122, 0.15);
+      color: var(--text-secondary);
+      border: 1px solid rgba(113, 113, 122, 0.3);
+    }
+
+    .drafts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .draft-card {
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      background-color: var(--bg-surface);
+      box-shadow: var(--shadow-md);
+      transition: all 0.3s ease;
+    }
+    .draft-card:hover {
+      border-color: rgba(14, 165, 233, 0.3);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .draft-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    .draft-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+    
+    .draft-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    
+    .draft-variants-list {
+      background-color: rgba(0, 0, 0, 0.25);
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      max-height: 250px;
+      overflow-y: auto;
+    }
+    
+    .draft-variant-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .draft-variant-row input {
+      flex: 1;
+      background-color: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .draft-variant-row input:focus {
+      border-color: var(--border-focus);
+    }
+    
+    .draft-variant-row select {
+      background-color: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 0.5rem;
+      font-family: var(--font-family);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    
+    .draft-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid var(--border-color);
+      padding-top: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    /* طابور اليوم — اعتماد سريع */
+    .today-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .today-stat {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      padding: 0.85rem 1rem;
+      text-align: center;
+    }
+    .today-stat .num {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.2;
+    }
+    .today-stat .lbl {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.2rem;
+    }
+    .today-section {
+      margin-bottom: 1.75rem;
+    }
+    .today-section h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .today-card {
+      border: 1px solid var(--border-color);
+      border-radius: 0.75rem;
+      background: var(--bg-surface);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .today-card-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .today-card-head strong {
+      color: var(--color-primary);
+      font-size: 1rem;
+    }
+    .today-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+    .today-preview {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      background: rgba(0,0,0,0.2);
+      border-radius: 0.5rem;
+      padding: 0.6rem 0.75rem;
+      margin-bottom: 0.75rem;
+      white-space: pre-wrap;
+      max-height: 4.5em;
+      overflow: hidden;
+    }
+    .today-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .today-empty {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+    .today-progress-bar {
+      height: 8px;
+      background: var(--bg-input);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 0.5rem 0 1rem;
+    }
+    .today-progress-bar > span {
+      display: block;
+      height: 100%;
+      background: var(--gradient-primary);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+    
+    /* تنسيقات تقدم معالجة المستندات */
+    .doc-progress-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 120px;
+    }
+    .doc-progress-bar {
+      flex: 1;
+      height: 6px;
+      background: var(--bg-input);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .doc-progress-fill {
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: width 0.3s ease;
+    }
+    .doc-progress-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      font-family: monospace;
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container dashboard-layout">
+    <!-- رأس الصفحة -->
+    <header class="app-header">
+      <div class="header-logo">
+        <span class="logo-icon">⚙️</span>
+        <div class="logo-text">
+          <h1>لوحة التدريب والتحكم</h1>
+          <span class="logo-subtitle">مراقبة وتعديل عقل سَنَد</span>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <a href="index.html" class="nav-link btn-secondary">
+          <span>العودة للدردشة</span>
+          <span class="nav-icon">💬</span>
+        </a>
+      </nav>
+    </header>
+
+    <div class="dashboard-body">
+      <!-- شريط التبويبات الجانبي/العلوي -->
+      <aside class="dashboard-sidebar">
+        <nav class="tab-buttons" id="tab-buttons">
+          <button class="tab-btn active" data-tab="today">
+            <span class="tab-icon">🌅</span>
+            <span class="tab-label">طابور اليوم</span>
+            <span class="badge badge-error" id="today-badge" style="display: none;">0</span>
+          </button>
+          <button class="tab-btn" data-tab="queue">
+            <span class="tab-icon">📥</span>
+            <span class="tab-label">الطابور المعلق</span>
+            <span class="badge badge-error" id="queue-badge" style="display: none;">0</span>
+          </button>
+          <button class="tab-btn" data-tab="answers">
+            <span class="tab-icon">📚</span>
+            <span class="tab-label">إدارة الإجابات</span>
+          </button>
+          <button class="tab-btn" data-tab="sources">
+            <span class="tab-icon">🔗📄</span>
+            <span class="tab-label">المصادر والمستندات</span>
+            <span class="badge badge-error" id="sources-badge" style="display: none;">0</span>
+          </button>
+          <button class="tab-btn" data-tab="skills">
+            <span class="tab-icon">🛠️</span>
+            <span class="tab-label">المهارات والردود</span>
+          </button>
+          <button class="tab-btn" data-tab="synonyms">
+            <span class="tab-icon">🔤</span>
+            <span class="tab-label">قاموس المرادفات</span>
+          </button>
+          <button class="tab-btn" data-tab="exams">
+            <span class="tab-icon">🎓</span>
+            <span class="tab-label">امتحان الذات</span>
+          </button>
+          <button class="tab-btn" data-tab="stats">
+            <span class="tab-icon">📊</span>
+            <span class="tab-label">السجل والإحصاءات</span>
+          </button>
+          <button class="tab-btn" data-tab="evolution">
+            <span class="tab-icon">📈</span>
+            <span class="tab-label">التطور</span>
+          </button>
+          <button class="tab-btn" data-tab="backup">
+            <span class="tab-icon">⚙️</span>
+            <span class="tab-label">النسخ والـ CSV</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- محتوى التبويبات -->
+      <main class="dashboard-content">
+        <!-- التنبيهات العامة -->
+        <div id="alert-container" class="alert-container"></div>
+
+        <!-- 0. طابور اليوم — 5 دقائق صباحاً -->
+        <section id="tab-content-today" class="tab-content active">
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>طابور اليوم 🌅</h2>
+                <p>كل ما يحتاج اعتمادك الآن: مسودات، عناقيد متكررة، وأصوات سلبية — دفعة واحدة في أقل من 5 دقائق.</p>
+              </div>
+              <button class="btn-secondary" onclick="fetchTodayQueue()" title="تحديث">🔄 تحديث</button>
+            </div>
+          </div>
+          <div id="today-summary" class="today-summary">
+            <div class="today-stat"><div class="num" id="today-stat-drafts">—</div><div class="lbl">مسودات</div></div>
+            <div class="today-stat"><div class="num" id="today-stat-queue">—</div><div class="lbl">أسئلة معلّقة</div></div>
+            <div class="today-stat"><div class="num" id="today-stat-clusters">—</div><div class="lbl">عناقيد ساخنة</div></div>
+            <div class="today-stat"><div class="num" id="today-stat-downs">—</div><div class="lbl">👎 أخيراً</div></div>
+          </div>
+          <div class="today-progress-bar" title="تقدّم مسح البنود"><span id="today-progress-fill"></span></div>
+          <p id="today-progress-label" class="today-meta" style="margin-top:-0.5rem;">—</p>
+          <div id="today-metrics-hint" class="today-meta" style="display:none;"></div>
+
+          <div class="today-section">
+            <h3>📝 مسودات بانتظار الاعتماد <span class="badge" id="today-drafts-count" style="display:none;">0</span></h3>
+            <div id="today-drafts-list"><div class="loading-spinner">جاري التحميل...</div></div>
+          </div>
+          <div class="today-section">
+            <h3>🔥 عناقيد الطابور <span class="badge" id="today-clusters-count" style="display:none;">0</span></h3>
+            <div id="today-clusters-list"></div>
+          </div>
+          <div class="today-section">
+            <h3>👎 أصوات سلبية أخيرة <span class="badge" id="today-downs-count" style="display:none;">0</span></h3>
+            <div id="today-downs-list"></div>
+          </div>
+        </section>
+
+        <!-- 1. تبويب الطابور -->
+        <section id="tab-content-queue" class="tab-content">
+          <div class="content-header">
+            <h2>أسئلة المستخدمين بانتظار التدريب</h2>
+            <p>هنا تجد الأسئلة التي لم يثق البوت في إجابتها. يمكنك ربطها بإجابة موجودة أو إنشاء إجابة جديدة لها.</p>
+          </div>
+          <div class="queue-list" id="queue-list-container">
+            <div class="loading-spinner">جاري تحميل البيانات...</div>
+          </div>
+        </section>
+
+        <!-- 2. تبويب الإجابات -->
+        <section id="tab-content-answers" class="tab-content">
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>المكتبة المعرفية (الإجابات)</h2>
+                <p>جميع الإجابات الثابتة والأسئلة المرادفة المرتبطة بها في عقل البوت.</p>
+              </div>
+              <button class="btn-primary" onclick="showAddAnswerModal()">
+                <span>إضافة إجابة جديدة</span>
+                <span>➕</span>
+              </button>
+            </div>
+            <div class="search-bar">
+              <input type="text" id="answer-search-input" placeholder="ابحث في الإجابات..." oninput="filterAnswersTable()">
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>العنوان (المرجع)</th>
+                    <th>عدد الصيغ (Variants)</th>
+                    <th>آخر تحديث</th>
+                    <th>العمليات</th>
+                  </tr>
+                </thead>
+                <tbody id="answers-table-body">
+                  <tr>
+                    <td colspan="4" class="text-center">جاري التحميل...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. تبويب المصادر -->
+        <section id="tab-content-sources" class="tab-content">
+          <!-- قسم المستندات الجديد -->
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>تعلم المستندات 📄</h2>
+                <p>ارفع ملفات الأدلة والسياسات وسيقوم عقل سَنَد بتحويلها إلى مسودات أسئلة وأجوبة.</p>
+              </div>
+              <div>
+                <input type="file" id="document-file-input" accept=".pdf,.xlsx,.csv,.txt" style="display: none;" onchange="handleDocumentUpload(this)">
+                <button class="btn-primary" onclick="document.getElementById('document-file-input').click()">
+                  <span>رفع مستند جديد 📄</span>
+                  <span>➕</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card" style="padding: 1rem; margin-bottom: 1.5rem; background-color: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 8px;">
+            <p style="font-size: 0.95rem; color: var(--text-secondary); margin: 0; display: flex; align-items: center; gap: 0.5rem; line-height: 1.5;">
+              <span>💡</span>
+              <span>لو ملفك عمودا سؤال/جواب جاهزان، استخدم استيراد CSV المباشر في تبويب النسخ الاحتياطي — هذا القسم للملفات الحرة (أدلة، سياسات، شروحات).</span>
+            </p>
+          </div>
+
+          <!-- جدول المستندات -->
+          <div class="card table-card" style="margin-bottom: 3rem;">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>اسم المستند</th>
+                    <th>النوع</th>
+                    <th>الحجم</th>
+                    <th>الحالة</th>
+                    <th>التقدم</th>
+                    <th>العمليات</th>
+                  </tr>
+                </thead>
+                <tbody id="documents-table-body">
+                  <tr>
+                    <td colspan="6" class="text-center">جاري تحميل المستندات...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>إدارة المصادر وتوجيهات المدرب 🔗</h2>
+                <p>أضف روابط الخدمات وتوجيهاتك وسيقوم العقل المدبر بتوليد مسودات الأسئلة والأجوبة المقترحة.</p>
+              </div>
+              <button class="btn-primary" onclick="showAddSourceModal()">
+                <span>إضافة مصدر جديد</span>
+                <span>➕</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- جدول المصادر -->
+          <div class="card table-card">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>العنوان (الرابط)</th>
+                    <th>الحالة</th>
+                    <th>تاريخ الإضافة</th>
+                    <th>العمليات</th>
+                  </tr>
+                </thead>
+                <tbody id="sources-table-body">
+                  <tr>
+                    <td colspan="4" class="text-center">جاري تحميل المصادر...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- قسم مسودات التدريب بانتظار الاعتماد -->
+          <div class="content-header" style="margin-top: 3rem;">
+            <h2>مسودات بانتظار اعتمادك 🧠</h2>
+            <p>راجع إجابات الأسئلة والصيغ المولّدة تلقائياً من توجيهاتك قبل تدريب البوت عليها.</p>
+          </div>
+          
+          <div id="drafts-container" class="drafts-list">
+            <div class="loading-spinner">جاري تحميل المسودات المعلقة...</div>
+          </div>
+        </section>
+
+        <!-- 3. تبويب المهارات -->
+        <section id="tab-content-skills" class="tab-content">
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>مهارات الاستجابة الخاصة</h2>
+                <p>الردود الديناميكية المبنية على قوالب ومحفزات محددة (مثل الترحيب والوقت).</p>
+              </div>
+              <button class="btn-primary" onclick="showAddSkillModal()">
+                <span>إضافة مهارة جديدة</span>
+                <span>➕</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="skills-grid" id="skills-grid-container">
+            <div class="loading-spinner">جاري تحميل المهارات...</div>
+          </div>
+        </section>
+
+        <!-- 4. تبويب السجل والإحصاءات -->
+        <section id="tab-content-stats" class="tab-content">
+          <div class="content-header">
+            <h2>إحصاءات النظام وسجل التغييرات</h2>
+            <p>متابعة أداء محرك الأسئلة، وتحفيز الذكاء الاصطناعي لتوسعة الصياغات تلقائياً.</p>
+          </div>
+
+          <div class="stats-grid" id="stats-cards-container">
+            <!-- كروت الإحصاءات -->
+          </div>
+
+          <div class="action-card card">
+            <div class="action-card-content">
+              <h3>حلقة التدريب الذاتي (Self-Training Loop)</h3>
+              <p>تحفيز العقل المدبر لتوسعة الصياغات المرادفة تلقائياً واكتشاف اقتراحات لدمج الإجابات المتشابهة.</p>
+            </div>
+            <button class="btn-primary glow-btn" id="btn-run-selftrain" onclick="runSelfTrain()">
+              <span>درِّب الآن 🔁</span>
+            </button>
+          </div>
+
+          <div class="card logs-card">
+            <h3>آخر الأحداث في سجل التدريب (training_log)</h3>
+            <div class="logs-terminal" id="logs-terminal-container">
+              <!-- سجل التدريب كـ console style -->
+            </div>
+          </div>
+        </section>
+
+        <!-- تبويب التطور -->
+        <section id="tab-content-evolution" class="tab-content">
+          <div class="content-header">
+            <h2>منحنيات تطور الأداء والبيانات</h2>
+            <p>متابعة التغير التاريخي لمقاييس النظام وجودة المطابقة وحجم قاعدة المعرفة.</p>
+          </div>
+
+          <div class="card" style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+            <button class="btn-primary glow-btn" id="btn-run-nightly" onclick="runNightlyBatch()">
+              <span>شغّل الحلقة الليلية الآن 🌙</span>
+            </button>
+            <button class="btn-secondary" style="display: inline-flex; align-items: center; border: 1px solid var(--border-color); background: var(--bg-surface); padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; color: var(--text-primary);" id="btn-download-dataset" onclick="exportDataset()">
+              <span>تنزيل Dataset 📦</span>
+            </button>
+            <div id="nightly-run-report" style="width: 100%; display: none; margin-top: 1rem; padding: 1rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; font-family: monospace; white-space: pre-wrap; direction: rtl; text-align: right;"></div>
+          </div>
+
+          <div id="evolution-container">
+            <div id="evolution-placeholder" class="card" style="padding: 2rem; text-align: center; color: var(--text-secondary);">
+              تتجمع البيانات — عد غداً 🌱
+            </div>
+            <div id="evolution-charts" style="display: none; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+              <div class="card">
+                <h3 style="margin-bottom: 0.5rem;">درجة الامتحان الهجين</h3>
+                <canvas id="chart-hybrid" width="400" height="200" style="width: 100%; height: auto;"></canvas>
+              </div>
+              <div class="card">
+                <h3 style="margin-bottom: 0.5rem;">جاهزية الصفر المطلق (Lexical)</h3>
+                <canvas id="chart-lexical" width="400" height="200" style="width: 100%; height: auto;"></canvas>
+              </div>
+              <div class="card">
+                <h3 style="margin-bottom: 0.5rem;">حجم الطابور</h3>
+                <canvas id="chart-queue" width="400" height="200" style="width: 100%; height: auto;"></canvas>
+              </div>
+              <div class="card">
+                <h3 style="margin-bottom: 0.5rem;">حجم الـ Dataset</h3>
+                <canvas id="chart-dataset" width="400" height="200" style="width: 100%; height: auto;"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 4. تبويب المرادفات -->
+        <section id="tab-content-synonyms" class="tab-content">
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>قاموس المرادفات اللهجية والاختصارات</h2>
+                <p>إدارة الكلمات المترادفة التي يقوم البوت بتوحيدها تلقائياً لتسهيل المطابقة وفهم اللهجات (مثل باسورد -> كلمة المرور).</p>
+              </div>
+              <button class="btn-primary" onclick="showAddSynonymModal()">
+                <span>إضافة مرادف جديد</span>
+                <span>➕</span>
+              </button>
+            </div>
+            <div class="search-bar">
+              <input type="text" id="synonym-search-input" placeholder="ابحث في المرادفات..." oninput="filterSynonymsTable()">
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>المرادف (الكلمة المدخلة)</th>
+                    <th>الكلمة المعتمدة (Canonical)</th>
+                    <th>العمليات</th>
+                  </tr>
+                </thead>
+                <tbody id="synonyms-table-body">
+                  <tr>
+                    <td colspan="3" class="text-center">جاري التحميل...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. تبويب الامتحان الذاتي -->
+        <section id="tab-content-exams" class="tab-content">
+          <div class="content-header">
+            <div class="header-action-group">
+              <div>
+                <h2>امتحان الذات (Self-Exam Panel)</h2>
+                <p>قم بتشغيل اختبار أداء شامل للبوت. يمتحن سند نفسه عبر وضعين: الحتمي (Leave-One-Out) والذكي (باستخدام العقل لتوليد مرادفات جديدة).</p>
+              </div>
+              <button class="btn-primary glow-btn" id="btn-run-exam" onclick="runSelfExam()">
+                <span>🎓 تشغيل امتحان قياس الأداء</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="card table-card">
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>الإجابة المختبرة</th>
+                    <th>الوضع</th>
+                    <th>بلا أي AI 🔌</th>
+                    <th>عدد الصيغ المختبرة</th>
+                    <th>الصيغ الناجحة</th>
+                    <th>درجة الدقة / النجاح</th>
+                    <th>العمليات</th>
+                  </tr>
+                </thead>
+                <tbody id="exams-table-body">
+                  <tr>
+                    <td colspan="6" class="text-center text-secondary">اضغط على زر "تشغيل امتحان قياس الأداء" لقياس دقة مطابقة البوت.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 7. تبويب النسخ الاحتياطي والـ CSV -->
+        <section id="tab-content-backup" class="tab-content">
+          <div class="content-header">
+            <h2>النسخ الاحتياطي وإدارة CSV</h2>
+            <p>تصدير واستيراد البيانات بصيغة JSON أو CSV، واسترجاع النسخ الاحتياطية التلقائية المخزنة بالسيرفر.</p>
+          </div>
+
+          <div class="backup-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            <!-- JSON backup -->
+            <div class="card backup-card">
+              <div class="card-icon">⚙️</div>
+              <h3>إدارة معرفة JSON</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">حمل كامل المعرفة (answers, variants, skills) كملف JSON أو ارفعه لدمجه.</p>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn-primary btn-full" onclick="exportData()">تصدير JSON</button>
+                <form id="import-form" onsubmit="importData(event)">
+                  <div class="file-upload-wrapper">
+                    <input type="file" id="import-file-input" accept=".json" required>
+                    <label for="import-file-input" class="btn-secondary btn-full">اختر ملف JSON</label>
+                  </div>
+                  <button type="submit" class="btn-accent btn-full" style="margin-top: 0.5rem;">استيراد ودمج JSON</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- CSV backup -->
+            <div class="card backup-card">
+              <div class="card-icon">📊</div>
+              <h3>استيراد وتصدير CSV (Excel)</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">استيراد أو تصدير صياغات الأسئلة والإجابات بصيغة CSV المتوافقة مع إكسل.</p>
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <button class="btn-primary btn-full" onclick="exportCSV()">تصدير CSV</button>
+                <form id="import-csv-form" onsubmit="importCSV(event)">
+                  <div class="file-upload-wrapper">
+                    <input type="file" id="import-csv-file-input" accept=".csv" required>
+                    <label for="import-csv-file-input" class="btn-secondary btn-full">اختر ملف CSV</label>
+                  </div>
+                  <button type="submit" class="btn-accent btn-full" style="margin-top: 0.5rem;">استيراد ودمج CSV</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Auto Backups list -->
+            <div class="card backup-card" style="grid-column: 1 / -1;">
+              <div class="card-icon">🕒</div>
+              <h3>النسخ الاحتياطية التلقائية بالسيرفر</h3>
+              <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">يسرد الملفات المحفوظة تلقائياً في السيرفر (آخر 14 نسخة). يمكنك استرجاع أي نسخة مباشرة.</p>
+              <div class="table-responsive">
+                <table style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>اسم ملف النسخة</th>
+                      <th>تاريخ الحفظ</th>
+                      <th>العمليات</th>
+                    </tr>
+                  </thead>
+                  <tbody id="auto-backups-table-body">
+                    <tr>
+                      <td colspan="3" class="text-center">جاري تحميل النسخ الاحتياطية...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Modals (إطارات منبثقة للعمليات) -->
+    
+    <!-- 1. مودال إضافة/تعديل إجابة -->
+    <div class="modal-overlay" id="answer-modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="answer-modal-title">إضافة إجابة جديدة</h3>
+          <button class="close-btn" onclick="closeAnswerModal()">×</button>
+        </div>
+        <form id="answer-form" onsubmit="saveAnswer(event)">
+          <input type="hidden" id="answer-id-field">
+          
+          <div class="form-group">
+            <label for="answer-title-field">عنوان الإجابة (اسم تعريفي قصير) <span class="required">*</span></label>
+            <input type="text" id="answer-title-field" required placeholder="مثال: كيفية استعادة الحساب">
+          </div>
+
+          <div class="form-group">
+            <label for="answer-body-ar-field">نص الرد باللغة العربية (إجباري) <span class="required">*</span></label>
+            <textarea id="answer-body-ar-field" rows="4" required placeholder="نص الرد الدقيق الذي سيُعرض للمستخدم بالعربية..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="answer-body-en-field">نص الرد باللغة الإنجليزية (اختياري)</label>
+            <textarea id="answer-body-en-field" rows="4" placeholder="ترجمة الرد باللغة الإنجليزية (إذا تركتها فارغة، ستُترجم وتُخزّن تلقائياً عند أول طلب إنجليزي)..."></textarea>
+          </div>
+
+          <div class="form-group" id="existing-variants-group">
+            <label>صيغ الأسئلة الحالية المربوطة (Variants)</label>
+            <div class="variants-list-edit" id="existing-variants-list">
+              <!-- صيغ الأسئلة تضاف هنا ديناميكياً مع زر حذف لكل صيغة -->
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="answer-new-variants-field">إضافة صيغ أسئلة مرادفة جديدة (اكتب كل صيغة في سطر مستقل)</label>
+            <textarea id="answer-new-variants-field" rows="4" placeholder="مثال:
+كيف ارجع حسابي؟
+طريقة استعادة الحساب
+نسيت كلمة المرور"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeAnswerModal()">إلغاء</button>
+            <button type="submit" class="btn-primary">حفظ الإجابة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 2. مودال إضافة/تعديل مهارة -->
+    <div class="modal-overlay" id="skill-modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="skill-modal-title">إضافة مهارة جديدة</h3>
+          <button class="close-btn" onclick="closeSkillModal()">×</button>
+        </div>
+        <form id="skill-form" onsubmit="saveSkill(event)">
+          <input type="hidden" id="skill-id-field">
+
+          <div class="form-group">
+            <label for="skill-name-field">اسم المهارة المعرفي <span class="required">*</span></label>
+            <input type="text" id="skill-name-field" required placeholder="مثال: الترحيب">
+          </div>
+
+          <div class="form-group">
+            <label for="skill-desc-field">وصف المهارة</label>
+            <input type="text" id="skill-desc-field" placeholder="وصف موجز لوظيفة المهارة...">
+          </div>
+
+          <div class="form-group">
+            <label for="skill-triggers-field">عبارات التفعيل والمطابقة (اكتب كل عبارة تفعيل في سطر مستقل) <span class="required">*</span></label>
+            <textarea id="skill-triggers-field" rows="4" required placeholder="مثال:
+السلام عليكم
+مرحبا
+هلا والله
+hi
+hello"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="skill-template-field">قالب الرد النهائي <span class="required">*</span></label>
+            <textarea id="skill-template-field" rows="4" required placeholder="مثال: أهلاً بك! الوقت الحالي هو {time} والتاريخ {date}"></textarea>
+            <span class="field-hint">يدعم متغيرات مثل {time} لوقت الرياض، {date} لتاريخ اليوم، {question} لسؤال المستخدم.</span>
+          </div>
+
+          <div class="form-group form-check">
+            <input type="checkbox" id="skill-enabled-field" checked>
+            <label for="skill-enabled-field">المهارة نشطة وتعمل الآن</label>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeSkillModal()">إلغاء</button>
+            <button type="submit" class="btn-primary">حفظ المهارة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. مودال إضافة/تعديل مرادف -->
+    <div class="modal-overlay" id="synonym-modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="synonym-modal-title">إضافة مرادف جديد</h3>
+          <button class="close-btn" onclick="closeSynonymModal()">×</button>
+        </div>
+        <form id="synonym-form" onsubmit="saveSynonym(event)">
+          <input type="hidden" id="synonym-id-field">
+
+          <div class="form-group">
+            <label for="synonym-term-field">الكلمة المكتوبة (المرادف / اللهجة) <span class="required">*</span></label>
+            <input type="text" id="synonym-term-field" required placeholder="مثال: باسورد">
+          </div>
+
+          <div class="form-group">
+            <label for="synonym-canonical-field">الكلمة المعتمدة في النظام (Canonical) <span class="required">*</span></label>
+            <input type="text" id="synonym-canonical-field" required placeholder="مثال: كلمه المرور">
+            <span class="field-hint">سيقوم النظام باستبدال "الكلمة المكتوبة" بـ "الكلمة المعتمدة" تلقائياً أثناء المطابقة.</span>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeSynonymModal()">إلغاء</button>
+            <button type="submit" class="btn-primary">حفظ المرادف</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. مودال إضافة/تعديل مصدر -->
+    <div class="modal-overlay" id="source-modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="source-modal-title">إضافة مصدر جديد</h3>
+          <button class="close-btn" onclick="closeSourceModal()">×</button>
+        </div>
+        <form id="source-form" onsubmit="saveSource(event)">
+          <input type="hidden" id="source-id-field">
+          
+          <div class="form-group">
+            <label for="source-title-field">عنوان المصدر <span class="required">*</span></label>
+            <input type="text" id="source-title-field" required placeholder="مثال: نموذج طلب إجازة اضطرارية">
+          </div>
+
+          <div class="form-group">
+            <label for="source-url-field">رابط الخدمة/الفورم <span class="required">*</span></label>
+            <input type="text" id="source-url-field" required placeholder="https://example.com/form">
+          </div>
+
+          <div class="form-group">
+            <label for="source-guidance-field">التوجيه والتعليمات (توجيه المدرب) <span class="required">*</span></label>
+            <textarea id="source-guidance-field" rows="6" required placeholder="اكتب بحرية: ايش هذا الفورم؟ متى يستخدمه الموظف؟ ايش مميزاته وشروطه؟"></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" onclick="closeSourceModal()">إلغاء</button>
+            <button type="submit" class="btn-primary">حفظ المصدر</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="train.js"></script>
+</body>
+</html>
